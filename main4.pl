@@ -2,10 +2,8 @@
 #use strict;
 use warnings;
 use threads;
-#use Switch;
 use threads::shared;
 use Thread::Semaphore;
-use Data::Dumper;
 
 ### Variables Globales ###
 
@@ -22,8 +20,8 @@ my $ctr : shared = 0;
 
 # Comandos disponibles aca
 print "Comandos disponibles:\n";
-print " - crear-lector [tiempo-lectura]\n";
-print " - crear-escritor [tiempo-escritura]\n";
+print " - crear-lector [tiempo-lectura] [tiempo-inicio]\n";
+print " - crear-escritor [tiempo-escritura] [tiempo-inicio]\n";
 print " - listar <[escritores lectores todos]>\n";
 print " - salir\n"  ;
 
@@ -37,25 +35,53 @@ while($salir == 0) {
     my $command = $splittedInput[0];
         
     if( $command eq "crear-lector") {
-        # crear hilo de lector
+        # crear hilo de lector            
         
-        #until(threads->list(threads::running)<4){
-        #    print "Hay 4 threads corriendo no se pueden crear más hasta que no se libere 1\n";
-        #    sleep 1;
-        #    }
-                    
-        
-        $idHilo +=1;                 
-                        
-        my $t = threads->create('hiloLector', $idHilo, $splittedInput[1]);
+        $idHilo +=1; 
+        my $inicio = 0;
+
+        if($parametersCount < 2) {
+            print "Incorrecto: faltan parametros\n";
+            return;
+        }
+
+        if($parametersCount == 3) {
+            $inicio = $splittedInput[2];
+        }
+
+
+        if($splittedInput[1] eq $splittedInput[1]+0 && $inicio eq $inicio+0) {
+            my $t = threads->create('hiloLector', $idHilo, $splittedInput[1], $inicio);
+        }
+        else {
+            print 'Parametros incorrectos\n';
+            return;
+        }
         
     }
     elsif($command eq "crear-escritor") {
         # crear hilo de escritor
 
         $idHilo +=1;
-        
-        my $t = threads->create('hiloEscritor', $idHilo, $splittedInput[1]);
+
+        my $inicio = 0;
+
+        if($parametersCount < 2) {
+            print "Incorrecto: faltan parametros\n";
+            return;
+        }
+
+        if($parametersCount == 3) {
+            $inicio = $splittedInput[2];
+        }
+
+        if($splittedInput[1] eq $splittedInput[1]+0 && $inicio eq $inicio+0) {
+            my $t = threads->create('hiloEscritor', $idHilo, $splittedInput[1], $inicio);
+        }
+        else {
+            print 'Parametros incorrectos\n';
+            return;
+        }
     }
     elsif( $command eq "listar") {
 
@@ -72,10 +98,12 @@ while($salir == 0) {
 
 sub hiloLector {
       
-    my ($id,$sleep) = @_;
+    my ($id,$sleep, $inicio) = @_;
     my $self = threads->self(); 
     my $tid = $self->tid();
     my $out = $tid;
+
+    sleep($inicio);
 
     $inSem->down();
     $mxSem->down();
@@ -107,10 +135,12 @@ sub hiloLector {
 }
 
 sub hiloEscritor {
-    my ($id,$sleep) = @_;
+    my ($id,$sleep, $inicio) = @_;
     my $self = threads->self(); # referencia al objeto thread
     my $tid = $self->tid();
     my $out = $tid;
+
+    sleep($inicio);
 
     $inSem->down();
     $wrtSem->down();
