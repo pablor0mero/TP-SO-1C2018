@@ -312,14 +312,10 @@ sub salir {
   print "Finalizando threads...\n";
       
   foreach (threads->list()) {
-    $_->detach();
+    $_->join();
     
   }
-  
-  open(LECTURA,"> log.txt") || die "No pudo abrirse: $!";
-  print LECTURA localtime . "// ----   FIN DE PROGRAMA ----\n";
-  close(LECTURA);
-  
+ 
   print "Hasta la vista baby...\n"
   
 }
