@@ -16,6 +16,7 @@ my $inSem = Thread::Semaphore->new();
 my $mxSem = Thread::Semaphore->new();
 my $wrtSem = Thread::Semaphore->new();
 my $ctr : shared = 0;
+my @colaEjecucion;
 
 
 # Comandos disponibles aca
@@ -52,6 +53,9 @@ while($salir == 0) {
 
         if($splittedInput[1] eq $splittedInput[1]+0 && $inicio eq $inicio+0) {
             my $t = threads->create('hiloLector', $idHilo, $splittedInput[1], $inicio);
+            
+            push @colaEjecucion, $t;
+            
         }
         else {
             print 'Parametros incorrectos\n';
@@ -77,6 +81,7 @@ while($salir == 0) {
 
         if($splittedInput[1] eq $splittedInput[1]+0 && $inicio eq $inicio+0) {
             my $t = threads->create('hiloEscritor', $idHilo, $splittedInput[1], $inicio);
+            push @colaEjecucion, $t;
         }
         else {
             print 'Parametros incorrectos\n';
@@ -84,6 +89,7 @@ while($salir == 0) {
         }
     }
     elsif( $command eq "listar") {
+      listar();
 
     }
     elsif( $command eq "salir") {
@@ -117,7 +123,10 @@ sub hiloLector {
     $inSem->up();
 
 
-    print "Soy el Hilo Lector Id: ".$id . " , estoy ejecutando: ".$sleep . "seg\n" ;
+    #print "Soy el Hilo Lector Id: ".$id . " , estoy ejecutando: ".$sleep . "seg\n" ;
+    my $linea = "Soy el Hilo Lector Id: ".$id . " , estoy ejecutando: ".$sleep . "seg\n" ;
+    escribirLog($linea);
+    
     sleep($sleep);
 
     $mxSem->down();
@@ -129,8 +138,9 @@ sub hiloLector {
 
     $mxSem->up();
    
-    print "--Lector-id:",$id," Finalizado\n";
-      
+    #print "--Lector-id:",$id," Finalizado\n";
+    $linea =  "--Lector-id:",$id," Finalizado\n";
+    escribirLog($linea); 
     return $out
 }
 
@@ -145,13 +155,17 @@ sub hiloEscritor {
     $inSem->down();
     $wrtSem->down();
 
-    print "Soy el Hilo Escritor Id: ".$id . " , estoy esribiendo por: ".$sleep . "seg\n";
+    #print "Soy el Hilo Escritor Id: ".$id . " , estoy esribiendo por: ".$sleep . "seg\n";
+    my $linea = "Soy el Hilo Escritor Id: ".$id . " , estoy esribiendo por: ".$sleep . "seg\n";
+    escribirLog($linea);
     sleep($sleep);
 
     $wrtSem->up();
     $inSem->up();
     
-    print "Escritor-id:",$id," Finalizado\n";  
+    #print "Escritor-id:",$id," Finalizado\n";
+    $linea = "Escritor-id:".$id." Finalizado\n";
+    escribirLog($linea);
 
     return $out;
    
@@ -167,3 +181,23 @@ sub escribirLog {
     close(LECTURA);
     
 }
+
+sub listar {
+  
+  foreach $hilo (@colaEjecucion) {
+   
+   #ejecutando
+   if ($hilo->is_running()){
+    print "Soy el hilo tid: " ,  $hilo->tid() , " y estoy ejecutando\n";
+    
+   }
+   #finalizados
+   if ($hilo->is_joinable()) {
+    print "Soy el hilo tid: " ,  $hilo->tid() , " y termine\n";
+    
+    
+   }
+  }
+    
+}
+  
