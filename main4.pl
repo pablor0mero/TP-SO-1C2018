@@ -156,3 +156,14 @@ sub hiloEscritor {
     return $out;
    
 }
+
+
+sub escribirLog {
+    
+    my ($linea) = @_;
+     
+    open(LECTURA,">> log.txt") || die "No pudo abrirse: $!";
+    print LECTURA "$linea";
+    close(LECTURA);
+    
+}
