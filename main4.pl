@@ -5,8 +5,9 @@ use threads;
 use threads::shared;
 use Thread::Semaphore;
 use Thread::Queue;
-use lib '.';
+use lib './Modules/';
 use Priority;
+use Date::Parse;
 
 ### Variables Globales ###
 
@@ -68,8 +69,15 @@ while($salir == 0) {
 
         if($splittedInput[1] eq $splittedInput[1]+0 && $inicio eq $inicio+0) {
             
+            my $tlleg = $inicio + time ;
             
-            $colaNew->enqueue("--Lector: " . $idHilo, $inicio + time);
+            $colaNew->enqueue("--Lector: " . $idHilo, $tlleg);
+            
+            my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($tlleg);
+            
+            my $linea = localtime . "// Lector  ID: ".$idHilo." T. lleg.: ".$hour.":".$min.":".$sec;
+            $linea .= " T. Ejec.: " . $splittedInput[1] . " Delay: ". $inicio . " seg\n" ;
+            escribirResume($linea);
             
             #print "En la cola de listos esta: ", $colaListos->peek($idHilo-1) , "\n";
             
@@ -102,7 +110,15 @@ while($salir == 0) {
 
         if($splittedInput[1] eq $splittedInput[1]+0 && $inicio eq $inicio+0) {
             
-            $colaNew->enqueue("--Escritor: " . $idHilo , $inicio + time);
+            $tlleg = $inicio + time;
+            
+            $colaNew->enqueue("--Escritor: " . $idHilo , $tlleg);
+            
+            ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($tlleg);
+            
+            $linea = localtime . "// Escitor ID: ".$idHilo." T. lleg.: ".$hour.":".$min.":".$sec;
+            $linea .= " T. Ejec.: " . $splittedInput[1] . " Delay: ".$inicio. " seg\n" ;
+            escribirResume($linea);
                         
             my $t = threads->create('hiloEscritor', $idHilo, $splittedInput[1], $inicio);
             #push @colaEjecucion, $t;
@@ -152,10 +168,8 @@ sub hiloLector {
     $colaListos->dequeue();
     
     $colaEjecucion->enqueue("--Lector: " . $id );
-    
-    
-    #print "Soy el Hilo Lector Id: ".$id . " , estoy ejecutando: ".$sleep . "seg\n" ;
-    my $linea = "Soy el Hilo Lector Id: ".$id . " , estoy ejecutando: ".$sleep . "seg\n" ;
+           
+    my $linea = localtime . "// Ejecutando Lector Id: ".$id . " por: ".$sleep . " seg\n" ;
     escribirLog($linea);
     
     sleep($sleep);
@@ -171,10 +185,9 @@ sub hiloLector {
     
     $colaEjecucion->dequeue();
     $colaFinalizados->enqueue("--Lector: " . $id );
+             
+    $linea = localtime . "// Finalizado Lector Id: ".$id . "\n" ;
     
-   
-    #print "--Lector-id:",$id," Finalizado\n";
-    $linea =  "--Lector-id:". $id ." Finalizado\n";
     escribirLog($linea); 
     return $out
 }
@@ -195,8 +208,7 @@ sub hiloEscritor {
     $colaListos->dequeue();
     $colaEjecucion->enqueue("--Escritor: " . $id );
 
-    #print "Soy el Hilo Escritor Id: ".$id . " , estoy esribiendo por: ".$sleep . "seg\n";
-    my $linea = "Soy el Hilo Escritor Id: ".$id . " , estoy esribiendo por: ".$sleep . "seg\n";
+    my $linea = localtime . "// Ejecutando Escritor Id: ".$id . " por: ".$sleep . " seg\n" ;
     escribirLog($linea);
     sleep($sleep);
 
@@ -206,8 +218,8 @@ sub hiloEscritor {
     $colaEjecucion->dequeue();
     $colaFinalizados->enqueue("--Escritor: " . $id );
     
-    #print "Escritor-id:",$id," Finalizado\n";
-    $linea = "Escritor-id:".$id." Finalizado\n";
+    
+    $linea = localtime . "// Finalizado Escritor Id: ".$id . "\n" ;
     escribirLog($linea);
 
     return $out;
@@ -226,7 +238,8 @@ sub escribirLog {
 }
 
 sub listar {
-    
+    clr();
+    print "------LISTADO------------------\n";
     my $i=0;
   
     print "-Nuevos: \n";
@@ -277,22 +290,56 @@ sub listar {
      
       $i += 1;
     }    
-    
+    print "------------------------------\n";
 }
 
 sub inicializar {
-  
+  clr();
   open(LECTURA,"> log.txt") || die "No pudo abrirse: $!";
-  print LECTURA "--- INICIO DE PROGRAMA ---\n";
+  print LECTURA localtime . "// ---- LOG DE PROCESOS ----\n";
   close(LECTURA);
+  
+  open(RESUME,"> resume.txt") || die "No pudo abrirse: $!";
+  print RESUME localtime .  "// ----  LOG DE CARGA   ----\n";
+  close(RESUME);
   
   
 }
 
 sub salir {
+  clr();
   
+  print "Finalizando threads...\n";
+      
+  foreach (threads->list()) {
+    $_->detach();
+    
+  }
+  
+  open(LECTURA,"> log.txt") || die "No pudo abrirse: $!";
+  print LECTURA localtime . "// ----   FIN DE PROGRAMA ----\n";
+  close(LECTURA);
   
   print "Hasta la vista baby...\n"
   
 }
+
+sub  clr {
+          if ($OSNAME eq "MSWin32") {
+              system("cls");
+          } else { 
+              system("clear");
+          }
+      }
+
+sub escribirResume {
+    
+    my ($linea) = @_;
+     
+    open(RESUME,">> resume.txt") || die "No pudo abrirse: $!";
+    print RESUME "$linea";
+    close(RESUME);
+    
+}
+              
   

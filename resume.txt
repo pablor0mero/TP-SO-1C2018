@@ -1,0 +1,7 @@
+Wed Jun 20 18:31:17 2018// ----  LOG DE CARGA   ----
+Wed Jun 20 18:31:21 2018// Lector  ID: 1 T. lleg.: 18:33:21 T. Ejec.: 10 Delay: 120 seg
+Wed Jun 20 18:31:25 2018// Lector  ID: 2 T. lleg.: 18:33:5 T. Ejec.: 10 Delay: 100 seg
+Wed Jun 20 18:31:29 2018// Escitor ID: 3 T. lleg.: 18:32:19 T. Ejec.: 10 Delay: 50 seg
+Wed Jun 20 18:31:32 2018// Lector  ID: 4 T. lleg.: 18:31:32 T. Ejec.: 20 Delay: 0 seg
+Wed Jun 20 18:31:37 2018// Lector  ID: 5 T. lleg.: 18:35:37 T. Ejec.: 10 Delay: 240 seg
+Wed Jun 20 18:31:41 2018// Escitor ID: 6 T. lleg.: 18:31:41 T. Ejec.: 5 Delay: 0 seg
