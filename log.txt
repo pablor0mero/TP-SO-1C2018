@@ -1,0 +1,9 @@
+--- INICIO DE PROGRAMA ---
+Soy el Hilo Lector Id: 5 , estoy ejecutando: 5seg
+Soy el Hilo Lector Id: 4 , estoy ejecutando: 10seg
+--Lector-id:5 Finalizado
+--Lector-id:4 Finalizado
+Soy el Hilo Lector Id: 3 , estoy ejecutando: 10seg
+--Lector-id:3 Finalizado
+Soy el Hilo Lector Id: 2 , estoy ejecutando: 10seg
+--Lector-id:2 Finalizado
