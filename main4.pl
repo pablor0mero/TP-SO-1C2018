@@ -7,7 +7,7 @@ use Thread::Semaphore;
 use Thread::Queue;
 use lib './Modules/';
 use Priority;
-use Date::Parse;
+#use Date::Parse;
 
 ### Variables Globales ###
 
@@ -31,8 +31,6 @@ my $colaListos = Thread::Queue->new();
 my $colaFinalizados = Thread::Queue->new();
 my $colaNew = Thread::Queue::Priority->new();
 
-
-
 inicializar();
 
 # Comandos disponibles aca
@@ -41,7 +39,6 @@ print " - crear-lector [tiempo-lectura] [tiempo-inicio]\n";
 print " - crear-escritor [tiempo-escritura] [tiempo-inicio]\n";
 print " - listar <[escritores lectores todos]>\n";
 print " - salir\n"  ;
-
 
 while($salir == 0) {
     chomp(my $input = <STDIN>);
@@ -72,6 +69,7 @@ while($salir == 0) {
             my $tlleg = $inicio + time ;
             
             $colaNew->enqueue("--Lector: " . $idHilo, $tlleg);
+            listar();
             
             my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($tlleg);
             
@@ -113,6 +111,7 @@ while($salir == 0) {
             $tlleg = $inicio + time;
             
             $colaNew->enqueue("--Escritor: " . $idHilo , $tlleg);
+            listar();
             
             ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($tlleg);
             
@@ -151,8 +150,11 @@ sub hiloLector {
     my $out = $tid;
    
     sleep($inicio);
+
     $colaNew->dequeue();    
     $colaListos->enqueue("--Lector: " . $id );
+
+    listar();
         
     $inSem->down();
     $mxSem->down();
@@ -168,6 +170,8 @@ sub hiloLector {
     $colaListos->dequeue();
     
     $colaEjecucion->enqueue("--Lector: " . $id );
+
+    listar();
            
     my $linea = localtime . "// Ejecutando Lector Id: ".$id . " por: ".$sleep . " seg\n" ;
     escribirLog($linea);
@@ -185,6 +189,8 @@ sub hiloLector {
     
     $colaEjecucion->dequeue();
     $colaFinalizados->enqueue("--Lector: " . $id );
+
+    listar();
              
     $linea = localtime . "// Finalizado Lector Id: ".$id . "\n" ;
     
@@ -202,11 +208,15 @@ sub hiloEscritor {
     $colaNew->dequeue();    
     $colaListos->enqueue("--Escritor: " . $id );
 
+    listar();
+
     $inSem->down();
     $wrtSem->down();
     
     $colaListos->dequeue();
     $colaEjecucion->enqueue("--Escritor: " . $id );
+
+    listar();
 
     my $linea = localtime . "// Ejecutando Escritor Id: ".$id . " por: ".$sleep . " seg\n" ;
     escribirLog($linea);
@@ -217,7 +227,8 @@ sub hiloEscritor {
     
     $colaEjecucion->dequeue();
     $colaFinalizados->enqueue("--Escritor: " . $id );
-    
+
+    listar();
     
     $linea = localtime . "// Finalizado Escritor Id: ".$id . "\n" ;
     escribirLog($linea);
